@@ -1,13 +1,11 @@
 package com.technova.msuser.domain;
 
+import com.technova.dto.user.Address;
+import com.technova.dto.user.PhoneNumber;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-
-import javax.annotation.processing.Generated;
-import java.util.UUID;
 
 @Document(collection = "user")
 public class UserEntity {

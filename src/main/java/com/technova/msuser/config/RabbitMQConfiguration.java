@@ -34,6 +34,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public Queue queueUserFindByIdRequest() {
+        return new Queue("user-find_by_id-request", true);
+    }
+
+    @Bean
     public Queue queueUserFindByEmailRequest() {
         return new Queue("user-find-by-email-request", true);
     }

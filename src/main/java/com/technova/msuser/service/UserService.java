@@ -1,12 +1,14 @@
 package com.technova.msuser.service;
 
-import com.technova.dto.Result;
-import com.technova.dto.user.UserResponseDTO;
-import com.technova.exceptions.user.UserAlreadyExistsException;
-import com.technova.exceptions.user.UserNotFoundException;
 import com.technova.msuser.domain.UserEntity;
 import com.technova.msuser.mapper.UserMapper;
 import com.technova.msuser.repository.UserRepository;
+import com.technova.user.UserCreateDTO;
+import com.technova.user.UserResponseDTO;
+import com.technova.user.constants.RabbitUserConstants;
+import com.technova.user.dto.Result;
+import com.technova.user.exceptions.UserAlreadyExistsException;
+import com.technova.user.exceptions.UserNotFoundException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,18 +22,18 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    @RabbitListener(queues = "user-save-request")
-    public Result<?> save(UserEntity user) {
-        UserEntity userExists = findUserByEmail(user.getEmail());
+    @RabbitListener(queues = RabbitUserConstants.USER_SAVE_REQUEST_QUEUE)
+    public Result<?> save(UserCreateDTO userDTO) {
+        UserEntity userExists = findUserByEmail(userDTO.getEmail());
         if (userExists != null) {
             return Result.error(new UserAlreadyExistsException("User already exists"));
         }
-        user.setRole("USER");
-        userRepository.save(user);
+        UserEntity userEntity = UserMapper.toUserEntity(userDTO);
+        userRepository.save(userEntity);
         return Result.success(null);
     }
 
-    @RabbitListener(queues = "user-login-request")
+    @RabbitListener(queues = RabbitUserConstants.USER_LOGIN_REQUEST_QUEUE)
     public Result<UserResponseDTO> getUserByEmail(String email) {
         UserEntity user = findUserByEmail(email);
         if (user != null) {
@@ -40,7 +42,7 @@ public class UserService {
         return Result.error(new UserNotFoundException("User not found"));
     }
 
-    @RabbitListener(queues = "user-find_by_id-request")
+    @RabbitListener(queues = RabbitUserConstants.USER_FIND_BY_ID_REQUEST_QUEUE)
     public Result<UserResponseDTO> findById(String id) {
         UserEntity user = userRepository.findById(id).orElse(null);
         if (user != null) {

@@ -1,7 +1,7 @@
 package com.technova.msuser.domain;
 
-import com.technova.dto.user.Address;
-import com.technova.dto.user.PhoneNumber;
+import com.technova.user.Address;
+import com.technova.user.PhoneNumber;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -87,6 +87,15 @@ public class UserEntity {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+    }
+
+    public UserEntity(String name, String email, String password, PhoneNumber phoneNumber, Address address) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = "USER";
         this.phoneNumber = phoneNumber;
         this.address = address;
     }

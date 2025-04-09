@@ -3,6 +3,7 @@ package com.technova.msuser.service;
 import com.technova.msuser.domain.UserEntity;
 import com.technova.msuser.mapper.UserMapper;
 import com.technova.msuser.repository.UserRepository;
+import com.technova.user.PhoneNumber;
 import com.technova.user.UserCreateDTO;
 import com.technova.user.UserResponseDTO;
 import com.technova.user.constants.RabbitUserConstants;
@@ -34,8 +35,18 @@ public class UserService {
     }
 
     @RabbitListener(queues = RabbitUserConstants.USER_LOGIN_REQUEST_QUEUE)
-    public Result<UserResponseDTO> getUserByEmail(String email) {
-        UserEntity user = findUserByEmail(email);
+    public Result<UserResponseDTO> getUserByEmail(String credential) {
+
+        UserEntity user = null;
+
+        if (credential.contains("@")) {
+            user = userRepository.findByEmail(credential);
+        } else if (credential.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+            user = userRepository.findByEmail(credential);
+        } else if (credential.matches("^\\+?\\d{1,3}?[-.\\s]?\\(?\\d{2,3}\\)?[-.\\s]?\\d{4,5}[-.\\s]?\\d{4}$")) {
+            user = userRepository.findByPhoneNumber(new PhoneNumber(credential));
+        }
+
         if (user != null) {
             return Result.success(UserMapper.toUserResponseDTO(user));
         }

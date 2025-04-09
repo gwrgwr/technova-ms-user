@@ -17,12 +17,19 @@ public class UserEntity {
     @Indexed(unique = true)
     private String email;
 
+    @Indexed(unique = true)
+    private String username;
+
+    @Indexed(unique = true)
+    private String cpf;
+
     private String password;
 
     private String role = "USER";
 
     private PhoneNumber phoneNumber;
 
+    @Indexed(unique = true)
     private Address address;
 
     public ObjectId getId() {

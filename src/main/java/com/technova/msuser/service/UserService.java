@@ -1,5 +1,6 @@
 package com.technova.msuser.service;
 
+import com.technova.Result;
 import com.technova.msuser.domain.UserEntity;
 import com.technova.msuser.mapper.UserMapper;
 import com.technova.msuser.repository.UserRepository;
@@ -7,7 +8,6 @@ import com.technova.user.PhoneNumber;
 import com.technova.user.UserCreateDTO;
 import com.technova.user.UserResponseDTO;
 import com.technova.user.constants.RabbitUserConstants;
-import com.technova.user.dto.Result;
 import com.technova.user.exceptions.UserAlreadyExistsException;
 import com.technova.user.exceptions.UserNotFoundException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

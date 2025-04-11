@@ -1,7 +1,7 @@
 package com.technova.msuser.repository;
 
 import com.technova.msuser.domain.UserEntity;
-import com.technova.user.PhoneNumber;
+import com.technova.user.dto.PhoneNumber;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

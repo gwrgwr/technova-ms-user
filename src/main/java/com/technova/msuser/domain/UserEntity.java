@@ -1,7 +1,9 @@
 package com.technova.msuser.domain;
 
-import com.technova.user.Address;
-import com.technova.user.PhoneNumber;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.technova.user.dto.Address;
+import com.technova.user.dto.PhoneNumber;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -10,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "user")
 public class UserEntity {
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
     private String name;

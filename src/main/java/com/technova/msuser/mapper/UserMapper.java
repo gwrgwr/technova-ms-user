@@ -7,7 +7,7 @@ import com.technova.user.dto.UserResponseDTO;
 
 public class UserMapper {
     public static UserResponseDTO toUserResponseDTO(UserEntity user) {
-        return new UserResponseDTO(user.getId(), user.getEmail(), user.getPassword(), user.getRole(), user.getAddress(), user.getPhoneNumber());
+        return new UserResponseDTO(user.getId().toHexString(), user.getEmail(), user.getPassword(), user.getRole(), user.getAddress(), user.getPhoneNumber());
     }
 
     public static UserEntity toUserEntity(UserCreateDTO dto) {

@@ -24,7 +24,7 @@ spec:
             - name: MONGODB_URI_MS_USER
               valueFrom:
                 secretKeyRef:
-                  name: mongdob-ms-user
+                  name: mongodb-ms-user
                   key: MONGODB_URI_MS_USER
             - name: RABBITMQ_USER
               value: "admin"

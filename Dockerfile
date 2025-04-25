@@ -1,21 +1,24 @@
-# Etapa de build
-FROM maven:3.9.4-eclipse-temurin-17 AS build
-WORKDIR /build
-
-COPY services/technova-common /tmp/technova-common
-RUN cd /tmp/technova-common && mvn clean install -DskipTests
-
+# Estágio 1: build
+FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
 
-COPY services/technova-ms-user/pom.xml .
-COPY services/technova-ms-user/src ./src
+ARG GITHUB_TOKEN
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 
-RUN mvn dependency:go-offline
+COPY .jenkins/settings.xml /root/.m2/settings.xml
 
-RUN mvn clean package -DskipTests
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# Etapa final de execução
-FROM eclipse-temurin:17
+COPY src ./src
+RUN mvn package -DskipTests
+
+RUN rm -f /root/.m2/settings.xml
+
+# Estágio 2: imagem final leve
+FROM openjdk:17
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar ./app.jar
+EXPOSE 8080
+ENV SPRING_PROFILES_ACTIVE=prod
 ENTRYPOINT ["java", "-jar", "app.jar"]

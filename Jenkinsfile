@@ -21,22 +21,21 @@ def POD_LABEL = 'kaniko'
         }
 
         stage('Checkout Helm Chart') {
-                    git url: 'https://github.com/gwrgwr/technova-helm.git', branch: 'master', credentialsId: 'github-auth'
-                }
+            git url: 'https://github.com/gwrgwr/technova-helm.git', branch: 'master', credentialsId: 'github-auth'
+        }
 
-                stage('Deploy to Kubernetes') {
-                    container('kubectl') {
-                        withKubeConfig([credentialsId: 'jenkins-token', namespace: 'jenkins', serverUrl: 'https://192.168.49.2:8443']) {
-                                    sh '''
-                                        helm upgrade --install technova-ms-user ./charts/user/ \
-                                        --values values.yaml \
-                                        --values charts/user/values.yaml \
-                                        --namespace technova \
-                                        --set user.image.tag=''' + env.BUILD_ID + ''' \
-                                        --wait \
-                                        --atomic
-                                        '''
-                                }
-                        }
+        stage('Deploy to Kubernetes') {
+            container('kubectl') {
+                withKubeConfig([credentialsId: 'jenkins-token', namespace: 'jenkins', serverUrl: 'https://192.168.49.2:8443']) {
+                    sh '''
+                        helm upgrade --install technova-ms-user ./charts/user/ \
+                        --values values.yaml \
+                        --values charts/user/values.yaml \
+                        --namespace technova \
+                        --wait \
+                        --atomic
+                        '''
                 }
+            }
+        }
     }

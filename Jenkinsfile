@@ -1,7 +1,8 @@
 def GITHUB_TOKEN = credentials('github-auth')
 def POD_LABEL = 'kaniko'
     node(POD_LABEL) {
-    def DOCKER_IMAGE_NAME = "gwrgwr/technova-ms-user:"
+    def DOCKER_IMAGE_NAME = "gwrgwr/technova-ms-user:${env.BUILD_ID}"
+    def DOCKER_IMAGE_NAME_LATEST = "gwrgwr/technova-ms-user:latest"
         stage('Checkout') {
             checkout scm
         }
@@ -13,8 +14,8 @@ def POD_LABEL = 'kaniko'
                                   --context `pwd` \
                                   --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
                                   --dockerfile=./Dockerfile \
-                                  --destination ''' + DOCKER_IMAGE_NAME + env.BUILD_ID + ''' \
-                                  --destination ''' + DOCKER_IMAGE_NAME '''latest \
+                                  --destination ''' + DOCKER_IMAGE_NAME + ''' \
+                                  --destination ''' + DOCKER_IMAGE_NAME_LATEST + '''\
                             '''
             }
         }

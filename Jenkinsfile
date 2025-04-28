@@ -12,7 +12,7 @@ def POD_LABEL = 'kaniko'
                                 /kaniko/executor \
                                   --context `pwd` \
                                   --dockerfile=./Dockerfile \
-                                  --destination ''' + DOCKER_IMAGE_NAME + ${env.BUILD_ID} + ''' \
+                                  --destination ''' + DOCKER_IMAGE_NAME + env.BUILD_ID + ''' \
                                   --destination ''' + DOCKER_IMAGE_NAME '''latest \
                                   --build-arg GITHUB_TOKEN=$GITHUB_TOKEN
                             '''

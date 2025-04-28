@@ -27,14 +27,15 @@ def POD_LABEL = 'kaniko'
         stage('Deploy to Kubernetes') {
             container('kubectl') {
                 withKubeConfig([credentialsId: 'jenkins-token', namespace: 'jenkins', serverUrl: 'https://192.168.49.2:8443']) {
-                    sh '''
+                    sh """
                         helm upgrade --install technova-ms-user ./charts/user/ \
                         --values values.yaml \
                         --values charts/user/values.yaml \
+                        --set user.image.tag=${env.BUILD_ID} \
                         --namespace technova \
                         --wait \
                         --atomic
-                        '''
+                        """
                 }
             }
         }

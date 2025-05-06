@@ -23,10 +23,17 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public UserEntity findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public UserEntity findUserByCpf(String cpf) {
+        return userRepository.findByCpf(cpf);
+    }
+
     @RabbitListener(queues = RabbitUserConstants.USER_SAVE_REQUEST_QUEUE)
     public Result<?> save(UserCreateDTO userDTO) {
-        UserEntity userExists = findUserByEmail(userDTO.getEmail());
-        if (userExists != null) {
+        if (findUserByEmail(userDTO.getEmail()) != null && findUserByUsername(userDTO.getName()) != null && findUserByCpf(userDTO.getCpf()) != null) {
             return Result.error(new UserAlreadyExistsException("User already exists"));
         }
         UserEntity userEntity = UserMapper.toUserEntity(userDTO);
@@ -35,7 +42,7 @@ public class UserService {
     }
 
     @RabbitListener(queues = RabbitUserConstants.USER_LOGIN_REQUEST_QUEUE)
-    public Result<UserResponseDTO> getUserByEmail(String credential) {
+    public Result<UserResponseDTO> getUserByCredential(String credential) {
 
         UserEntity user = null;
 
@@ -60,5 +67,13 @@ public class UserService {
             return Result.success(UserMapper.toUserResponseDTO(user));
         }
         return Result.error(new UserNotFoundException("User not found"));
+    }
+
+    @RabbitListener(queues = RabbitUserConstants.USER_DELETE_REQUEST_QUEUE)
+    public void deleteUser(String id) {
+        UserEntity user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            userRepository.delete(user);
+        }
     }
 }

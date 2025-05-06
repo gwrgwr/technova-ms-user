@@ -11,6 +11,6 @@ public class UserMapper {
     }
 
     public static UserEntity toUserEntity(UserCreateDTO dto) {
-        return new UserEntity(dto.getName(), dto.getEmail(), dto.getPassword(), dto.getPhoneNumber(), dto.getAddress());
+        return new UserEntity(dto.getName(), dto.getEmail(), dto.getCpf(), dto.getPassword(), dto.getPhoneNumber(), dto.getAddress());
     }
 }

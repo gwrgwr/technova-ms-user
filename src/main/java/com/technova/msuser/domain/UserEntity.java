@@ -32,7 +32,6 @@ public class UserEntity {
 
     private PhoneNumber phoneNumber;
 
-    @Indexed(unique = true)
     private Address address;
 
     public ObjectId getId() {
@@ -101,9 +100,11 @@ public class UserEntity {
         this.address = address;
     }
 
-    public UserEntity(String name, String email, String password, PhoneNumber phoneNumber, Address address) {
+    public UserEntity(String name, String email, String cpf, String username, String password, PhoneNumber phoneNumber, Address address) {
         this.name = name;
         this.email = email;
+        this.cpf = cpf;
+        this.username = username;
         this.password = password;
         this.role = "USER";
         this.phoneNumber = phoneNumber;
@@ -111,5 +112,21 @@ public class UserEntity {
     }
 
     public UserEntity() {
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

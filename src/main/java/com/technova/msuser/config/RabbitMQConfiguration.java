@@ -34,6 +34,16 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public Queue queueUserDeleteRequest() {
+        return new Queue(RabbitUserConstants.USER_DELETE_REQUEST_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingUserDeleteRequest(Queue queueUserDeleteRequest, Exchange userExchange) {
+        return BindingBuilder.bind(queueUserDeleteRequest).to(userExchange).with(RabbitUserConstants.USER_DELETE_REQUEST_ROUTING_KEY).noargs();
+    }
+
+    @Bean
     public Binding bindingUserSaveRequest(Queue queueUserSaveRequest, Exchange userExchange) {
         return BindingBuilder.bind(queueUserSaveRequest).to(userExchange).with(RabbitUserConstants.USER_SAVE_REQUEST_ROUTING_KEY).noargs();
     }

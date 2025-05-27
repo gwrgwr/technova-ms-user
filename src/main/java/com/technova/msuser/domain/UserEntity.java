@@ -20,6 +20,8 @@ public class UserEntity {
     @Indexed(unique = true)
     private String email;
 
+    private Boolean isApproved = false;
+
     @Indexed(unique = true)
     private String username;
 
@@ -128,5 +130,13 @@ public class UserEntity {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Boolean getApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(Boolean approved) {
+        isApproved = approved;
     }
 }

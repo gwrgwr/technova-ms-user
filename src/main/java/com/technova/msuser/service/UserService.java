@@ -1,13 +1,12 @@
 package com.technova.msuser.service;
 
 import com.technova.Result;
+import com.technova.exceptions.BaseException;
 import com.technova.msuser.domain.UserEntity;
 import com.technova.msuser.mapper.UserMapper;
 import com.technova.msuser.repository.UserRepository;
 import com.technova.user.constants.RabbitUserConstants;
-import com.technova.user.dto.PhoneNumber;
-import com.technova.user.dto.UserCreateDTO;
-import com.technova.user.dto.UserResponseDTO;
+import com.technova.user.dto.*;
 import com.technova.user.exceptions.UserAlreadyExistsException;
 import com.technova.user.exceptions.UserNotFoundException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -29,6 +28,10 @@ public class UserService {
 
     public UserEntity findUserByCpf(String cpf) {
         return userRepository.findByCpf(cpf);
+    }
+
+    public UserEntity findUserById(String id) {
+        return userRepository.findById(id).orElse(null);
     }
 
     @RabbitListener(queues = RabbitUserConstants.USER_SAVE_REQUEST_QUEUE)
@@ -74,6 +77,46 @@ public class UserService {
         UserEntity user = userRepository.findById(id).orElse(null);
         if (user != null) {
             userRepository.delete(user);
+        }
+    }
+
+    @RabbitListener(queues = RabbitUserConstants.USER_UPDATE_REQUEST_QUEUE)
+    public Result<UserResponseDTO> updateUser(UserUpdateDTO userDTO) {
+        UserEntity user = this.findUserById(userDTO.getId());
+        if (user != null) {
+            if (userDTO.getEmail() != null) {
+                user.setEmail(userDTO.getEmail());
+                this.userRepository.save(user);
+                return Result.success(UserMapper.toUserResponseDTO(user));
+            }
+            if (userDTO.getPassword() != null) {
+                user.setPassword(userDTO.getPassword());
+                this.userRepository.save(user);
+                return Result.success(UserMapper.toUserResponseDTO(user));
+            }
+            if (userDTO.getAddress() != null) {
+                user.setAddress(userDTO.getAddress());
+                this.userRepository.save(user);
+                return Result.success(UserMapper.toUserResponseDTO(user));
+            }
+            if (userDTO.getPhoneNumber() != null) {
+                user.setPhoneNumber(userDTO.getPhoneNumber());
+                this.userRepository.save(user);
+                return Result.success(UserMapper.toUserResponseDTO(user));
+            }
+            return Result.error(new BaseException("Unable to update user"));
+        }
+        return Result.error(new UserNotFoundException("User not found"));
+    }
+
+    @RabbitListener(queues = RabbitUserConstants.USER_CONFIRM_EMAIL_QUEUE)
+    public void updateUserApprovalStatus(UserConfirmEmailDTO userCreateDTO) {
+        UserEntity user = this.findUserByEmail(userCreateDTO.getEmail());
+        if (user != null) {
+            user.setApproved(userCreateDTO.getApproved());
+            this.userRepository.save(user);
+        } else {
+            throw new UserNotFoundException("User not found for confirmation");
         }
     }
 }

@@ -8,8 +8,11 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 @Document(collection = "user")
+@DynamoDbBean
 public class UserEntity {
     @Id
     @JsonSerialize(using = ToStringSerializer.class)
@@ -36,6 +39,7 @@ public class UserEntity {
 
     private Address address;
 
+    @DynamoDbPartitionKey
     public ObjectId getId() {
         return id;
     }

@@ -8,8 +8,8 @@ import com.technova.msuser.repository.UserRepository;
 import com.technova.msuser.service.UserService;
 import com.technova.user.constants.RabbitUserConstants;
 import com.technova.user.dto.*;
-import com.technova.user.exceptions.UserAlreadyExistsException;
-import com.technova.user.exceptions.UserNotFoundException;
+import com.technova.user.enums.UserStatus;
+import com.technova.user.exceptions.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,10 +44,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserEntity findUserByPhoneNumber(PhoneNumber phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
+
+    @Override
     @RabbitListener(queues = RabbitUserConstants.USER_SAVE_REQUEST_QUEUE)
     public Result<?> save(UserCreateDTO userDTO) {
-        if (findUserByEmail(userDTO.getEmail()) != null && findUserByUsername(userDTO.getName()) != null && findUserByCpf(userDTO.getCpf()) != null) {
-            return Result.error(new UserAlreadyExistsException("User already exists"));
+        if (findUserByCpf(userDTO.getCpf()) != null) {
+            return Result.error(new UserCPFAlreadyExistsException());
+        }
+        if (findUserByEmail(userDTO.getEmail()) != null) {
+            return Result.error(new UserEmailAlreadyExistsException());
+        }
+        if (findUserByUsername(userDTO.getUsername()) != null) {
+            return Result.error(new UserUsernameAlreadyExists());
+        }
+        if (findUserByPhoneNumber(userDTO.getPhoneNumber()) != null) {
+            return Result.error(new UserPhoneNumberAlreadyExistsException());
         }
         UserEntity userEntity = UserMapper.toUserEntity(userDTO);
         userRepository.save(userEntity);
@@ -55,23 +69,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @RabbitListener(queues = RabbitUserConstants.USER_LOGIN_REQUEST_QUEUE)
-    public Result<UserResponseDTO> getUserByCredential(String credential) {
+    public UserEntity getUserByCredential(String credential) {
 
         UserEntity user = null;
 
-        if (credential.contains("@")) {
-            user = userRepository.findByEmail(credential);
+        if (credential.matches("^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$\n")) {
+            return user = findUserByCpf(credential);
         } else if (credential.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-            user = userRepository.findByEmail(credential);
+            return user = findUserByEmail(credential);
         } else if (credential.matches("^\\+?\\d{1,3}?[-.\\s]?\\(?\\d{2,3}\\)?[-.\\s]?\\d{4,5}[-.\\s]?\\d{4}$")) {
-            user = userRepository.findByPhoneNumber(new PhoneNumber(credential));
+            return user = findUserByPhoneNumber(new PhoneNumber(credential));
         }
+        return null;
+    }
+
+    @Override
+    @RabbitListener(queues = RabbitUserConstants.USER_LOGIN_REQUEST_QUEUE)
+    public Result<UserResponseDTO> loginUser(String credential) {
+
+        UserEntity user = getUserByCredential(credential);
 
         if (user != null) {
             return Result.success(UserMapper.toUserResponseDTO(user));
         }
-        return Result.error(new UserNotFoundException("User not found"));
+        return Result.error(new UserNotFoundException());
     }
 
     @Override
@@ -81,7 +102,7 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             return Result.success(UserMapper.toUserResponseDTO(user));
         }
-        return Result.error(new UserNotFoundException("User not found"));
+        return Result.error(new UserNotFoundException());
     }
 
     @Override
@@ -89,7 +110,18 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(String id) {
         UserEntity user = userRepository.findById(id).orElse(null);
         if (user != null) {
-            userRepository.delete(user);
+            user.setStatus(UserStatus.SUSPENDED);
+            userRepository.save(user);
+        }
+    }
+
+    @Override
+    @RabbitListener(queues = RabbitUserConstants.USER_SOFT_DELETE_REQUEST_QUEUE)
+    public void softDeleteUser(String id) {
+        UserEntity user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setStatus(UserStatus.INACTIVE);
+            userRepository.save(user);
         }
     }
 
@@ -118,9 +150,9 @@ public class UserServiceImpl implements UserService {
                 this.userRepository.save(user);
                 return Result.success(UserMapper.toUserResponseDTO(user));
             }
-            return Result.error(new BaseException("Unable to update user"));
+            return Result.error(new BaseException());
         }
-        return Result.error(new UserNotFoundException("User not found"));
+        return Result.error(new UserNotFoundException());
     }
 
     @Override
@@ -131,7 +163,22 @@ public class UserServiceImpl implements UserService {
             user.setApproved(userCreateDTO.getApproved());
             this.userRepository.save(user);
         } else {
-            throw new UserNotFoundException("User not found for confirmation");
+            throw new UserNotFoundException();
         }
+    }
+
+    @Override
+    @RabbitListener(queues = RabbitUserConstants.USER_ACTIVE_REQUEST_QUEUE)
+    public Result<UserResponseDTO> activeUser(String id) {
+        UserEntity user = this.findUserById(id);
+        if (user != null) {
+            if (user.getStatus() == UserStatus.ACTIVE) {
+                return Result.error(null);
+            }
+            user.setStatus(UserStatus.ACTIVE);
+            this.userRepository.save(user);
+            return Result.success(UserMapper.toUserResponseDTO(user));
+        }
+        return Result.error(new UserNotFoundException());
     }
 }

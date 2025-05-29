@@ -39,8 +39,38 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public Queue queueUserSoftDeleteRequest() {
+        return new Queue(RabbitUserConstants.USER_SOFT_DELETE_REQUEST_QUEUE, true);
+    }
+
+    @Bean
+    public Queue queueUserConfirmEmail() {
+        return new Queue(RabbitUserConstants.USER_CONFIRM_EMAIL_QUEUE, true);
+    }
+
+    @Bean
     public Queue queueUserUpdateRequest() {
         return new Queue(RabbitUserConstants.USER_UPDATE_REQUEST_QUEUE, true);
+    }
+
+    @Bean
+    public Queue queueActivateUserRequest() {
+        return new Queue(RabbitUserConstants.USER_ACTIVE_REQUEST_QUEUE, true);
+    }
+
+    @Bean
+    public Binding bindingActivateUserRequest(Queue queueActivateUserRequest, Exchange userExchange) {
+        return BindingBuilder.bind(queueActivateUserRequest).to(userExchange).with(RabbitUserConstants.USER_ACTIVE_REQUEST_ROUTING_KEY).noargs();
+    }
+
+    @Bean
+    public Binding bindingUserConfirmEmail(Queue queueUserConfirmEmail, Exchange userExchange) {
+        return BindingBuilder.bind(queueUserConfirmEmail).to(userExchange).with(RabbitUserConstants.USER_CONFIRM_EMAIL_ROUTING_KEY).noargs();
+    }
+
+    @Bean
+    public Binding bindingUserSoftDeleteRequest(Queue queueUserSoftDeleteRequest, Exchange userExchange) {
+        return BindingBuilder.bind(queueUserSoftDeleteRequest).to(userExchange).with(RabbitUserConstants.USER_SOFT_DELETE_REQUEST_ROUTING_KEY).noargs();
     }
 
     @Bean

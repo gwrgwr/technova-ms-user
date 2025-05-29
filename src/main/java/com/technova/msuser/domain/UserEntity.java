@@ -1,50 +1,50 @@
 package com.technova.msuser.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.technova.user.dto.Address;
 import com.technova.user.dto.PhoneNumber;
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import com.technova.user.enums.UserStatus;
+import jakarta.persistence.*;
 
-@Document(collection = "user")
-@DynamoDbBean
+
+@Entity
 public class UserEntity {
+
     @Id
-    @JsonSerialize(using = ToStringSerializer.class)
-    private ObjectId id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     private String name;
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     private Boolean isApproved = false;
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String cpf;
 
     private String password;
 
     private String role = "USER";
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
+    @Embedded
+    @Column(unique = true, nullable = false)
     private PhoneNumber phoneNumber;
 
+    @Embedded
     private Address address;
 
-    @DynamoDbPartitionKey
-    public ObjectId getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -96,22 +96,13 @@ public class UserEntity {
         this.address = address;
     }
 
-    public UserEntity(ObjectId id, String name, String email, String password, String role, PhoneNumber phoneNumber, Address address) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-    }
-
     public UserEntity(String name, String email, String cpf, String username, String password, PhoneNumber phoneNumber, Address address) {
         this.name = name;
         this.email = email;
         this.cpf = cpf;
         this.username = username;
         this.password = password;
+        this.status = UserStatus.ACTIVE;
         this.role = "USER";
         this.phoneNumber = phoneNumber;
         this.address = address;
@@ -142,5 +133,13 @@ public class UserEntity {
 
     public void setApproved(Boolean approved) {
         isApproved = approved;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }

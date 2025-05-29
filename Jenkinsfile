@@ -21,7 +21,7 @@ def POD_LABEL = 'kaniko'
         }
 
         stage('Checkout Helm Chart') {
-            git url: 'https://github.com/gwrgwr/technova-helm.git', branch: 'master', credentialsId: 'github-auth'
+            git url: 'https://github.com/muriloramos-dev/technova-helm.git', branch: 'master', credentialsId: 'github-auth'
         }
 
         stage('Deploy to Kubernetes') {

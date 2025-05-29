@@ -11,7 +11,6 @@ import com.technova.user.dto.*;
 import com.technova.user.enums.UserStatus;
 import com.technova.user.exceptions.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service

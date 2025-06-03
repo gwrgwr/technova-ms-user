@@ -13,6 +13,8 @@ import com.technova.user.exceptions.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -135,9 +137,12 @@ public class UserServiceImpl implements UserService {
                 return Result.success(UserMapper.toUserResponseDTO(user));
             }
             if (userDTO.getPassword() != null) {
-                user.setPassword(userDTO.getPassword());
-                this.userRepository.save(user);
-                return Result.success(UserMapper.toUserResponseDTO(user));
+                if (!Objects.equals(userDTO.getPassword(), user.getPassword())) {
+                    user.setPassword(userDTO.getPassword());
+                    this.userRepository.save(user);
+                    return Result.success(UserMapper.toUserResponseDTO(user));
+                }
+                return Result.error(new PasswordAlreadyRegisteredException());
             }
             if (userDTO.getAddress() != null) {
                 user.setAddress(userDTO.getAddress());

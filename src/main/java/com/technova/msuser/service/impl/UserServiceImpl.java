@@ -12,6 +12,7 @@ import com.technova.user.enums.UserStatus;
 import com.technova.user.exceptions.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -25,31 +26,37 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity findUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity findUserByCpf(String cpf) {
         return userRepository.findByCpf(cpf);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity findUserById(String id) {
         return userRepository.findById(id).orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity findUserByPhoneNumber(PhoneNumber phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber);
     }
 
     @Override
+    @Transactional(readOnly = true)
     @RabbitListener(queues = RabbitUserConstants.USER_SAVE_REQUEST_QUEUE)
     public Result<?> save(UserCreateDTO userDTO) {
         if (findUserByCpf(userDTO.getCpf()) != null) {
@@ -70,6 +77,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity getUserByCredential(String credential) {
 
         UserEntity user = null;
@@ -85,6 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitUserConstants.USER_LOGIN_REQUEST_QUEUE)
     public Result<UserResponseDTO> loginUser(String credential) {
 
@@ -97,6 +106,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     @RabbitListener(queues = RabbitUserConstants.USER_FIND_BY_ID_REQUEST_QUEUE)
     public Result<UserResponseDTO> findById(String id) {
         UserEntity user = userRepository.findById(id).orElse(null);
@@ -107,6 +117,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitUserConstants.USER_DELETE_REQUEST_QUEUE)
     public void deleteUser(String id) {
         UserEntity user = userRepository.findById(id).orElse(null);
@@ -117,6 +128,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitUserConstants.USER_SOFT_DELETE_REQUEST_QUEUE)
     public void softDeleteUser(String id) {
         UserEntity user = userRepository.findById(id).orElse(null);
@@ -127,6 +139,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitUserConstants.USER_UPDATE_REQUEST_QUEUE)
     public Result<UserResponseDTO> updateUser(UserUpdateDTO userDTO) {
         UserEntity user = this.findUserById(userDTO.getId());
@@ -160,6 +173,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitUserConstants.USER_CONFIRM_EMAIL_QUEUE)
     public void updateUserApprovalStatus(UserConfirmEmailDTO userCreateDTO) {
         UserEntity user = this.findUserByEmail(userCreateDTO.getEmail());
@@ -172,6 +186,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     @RabbitListener(queues = RabbitUserConstants.USER_ACTIVE_REQUEST_QUEUE)
     public Result<UserResponseDTO> activeUser(String id) {
         UserEntity user = this.findUserById(id);
